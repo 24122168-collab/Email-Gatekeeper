@@ -1,8 +1,10 @@
 fastapi
 uvicorn
-gymnasium
-numpy>
+gymnasium>=0.29.0
+numpy
 pydantic
 gradio
 pyyaml
 google-generativeai
+openai
+openenv-core>=0.2.0
