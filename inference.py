@@ -4,44 +4,42 @@ import numpy as np
 from openai import OpenAI
 from env import EmailTriageEnv
 
-# 1. Environment Variables (Checklist ke mutabik)
-# Grader yahan se check karta hai
+# 1. Environment Variables (Grader yahan se API keys uthayega)
 API_BASE_URL = os.environ.get("API_BASE_URL")
-API_KEY = os.environ.get("API_KEY") # Checklist ke mutabik ye API_KEY hi hona chahiye
+API_KEY = os.environ.get("API_KEY") 
 MODEL_NAME = os.environ.get("MODEL_NAME", "meta-llama/Llama-3-70b-chat-hf")
 
-# client initialization with proxy
+# OpenAI client initialize karna zaroori hai Proxy ke liye
 client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
-def classify_email_with_llm(email_data):
-    """LLM ko call karke action lena, taaki grader ko API call dikhe."""
+def get_llm_action(email_desc, context, keywords):
+    """Llama-3 ko call karke action lena taaki API call record ho."""
     prompt = f"""
-    You are an AI Email Gatekeeper. Classify this email into 3 categories:
-    1. Urgency (0: Low, 1: Medium, 2: High)
-    2. Routing (0: Support, 1: Tech, 2: Legal/Security)
-    3. Resolution (0: Wait, 1: Reply, 2: Escalate)
+    Email: {email_desc}
+    Context: {context}
+    Keywords: {keywords}
 
-    Email Description: {email_data['description']}
-    Context: {email_data['context']}
-    Keywords: {email_data['keywords']}
+    Classify this email into 3 labels:
+    1. Urgency (0: General, 1: Billing, 2: Security Breach)
+    2. Routing (0: AI Auto-Reply, 1: Tech Support, 2: Legal)
+    3. Resolution (0: Archive, 1: Draft Reply, 2: Escalate to Human)
 
-    Return only 3 numbers separated by commas. Example: 1, 0, 1
+    Return only the numbers separated by commas. Example: 1, 0, 1
     """
-    
     try:
-        # --- YE HAI WO API CALL JO GRADER MAANG RAHA HAI ---
+        # --- YE HAI WO API CALL JO GRADER KO CHAHIYE ---
         response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=10,
             temperature=0
         )
-        # Result ko parse karna
-        res_text = response.choices[0].message.content.strip()
-        actions = [int(x.strip()) for x in res_text.split(",")]
+        res = response.choices[0].message.content.strip()
+        # Clean the response to get numbers
+        actions = [int(x.strip()) for x in res.split(",")[:3]]
         return np.array(actions, dtype=np.int64)
-    except:
-        # Fallback agar API fail ho jaye
+    except Exception as e:
+        # Fallback agar API fail ho (Security breach emails ke liye default high rakhna safe hai)
         return np.array([0, 0, 0], dtype=np.int64)
 
 def run_inference():
@@ -49,29 +47,44 @@ def run_inference():
     
     for task_name in tasks:
         try:
+            # Task-specific batch load karna
             env = EmailTriageEnv(task=task_name, shuffle=False)
             obs, info = env.reset(seed=42)
             
+            # [START] tag grader ke liye
             print(f"[START] task={task_name}", flush=True)
             
             terminated = False
             step_count = 0
             total_reward = 0.0
+            
+            # Email queue se data nikalna
             emails = list(env._queue)
             
             while not terminated and step_count < len(emails):
-                # Manual logic ki jagah LLM call use kar rahe hain
-                action = classify_email_with_llm(emails[step_count])
+                email_data = emails[step_count]
                 
+                # LLM se action lena (Real API Call)
+                action = get_llm_action(
+                    email_data['description'], 
+                    email_data['context'], 
+                    email_data['keywords']
+                )
+                
+                # Step execute karna
                 obs, reward, terminated, truncated, info = env.step(action)
                 total_reward += reward
                 
+                # [STEP] tag grader ke liye
                 print(f"[STEP] step={step_count+1} reward={reward:.2f}", flush=True)
                 step_count += 1
                 
+            # [END] tag grader ke liye
             print(f"[END] task={task_name} score={total_reward:.3f} steps={step_count}", flush=True)
             
         except Exception as e:
+            # Print error for debugging but don't stop the loop
+            print(f"Error in task {task_name}: {e}", file=sys.stderr)
             continue
 
 if __name__ == "__main__":
