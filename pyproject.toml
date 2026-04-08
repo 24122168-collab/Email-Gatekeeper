@@ -1,0 +1,25 @@
+[project]
+name = "email-gatekeeper"
+version = "1.0.0"
+description = "Intelligent Email Gatekeeper RL Environment"
+authors = [{name = "zerogravity"}]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "gymnasium>=0.29.0",
+    "numpy",
+    "pydantic",
+    "gradio",
+    "pyyaml",
+    "google-generativeai",
+    "openenv-core>=0.2.0"
+]
+requires-python = ">=3.10"
+
+# --- YE FIX HAI ---
+[project.scripts]
+server = "server.app:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
