@@ -1,0 +1,377 @@
+[
+  {
+    "_comment": "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+    "_section": "MEDIUM — Passive-Aggressive Legal Threats (polite tone, legal intent)",
+    "_comment_end": "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  },
+  {
+    "id": "TC-M-01",
+    "difficulty": "medium",
+    "category": "Passive-Aggressive Legal Threat",
+    "description": "Polite refund ultimatum with implied legal action",
+    "raw_email": {
+      "subject": "Following Up on My Refund Request — Third Attempt",
+      "body": "Dear Support Team, I have now contacted you three times regarding my refund of $340. I have been patient, but I want to make it clear that I am aware of my consumer rights and have already spoken with a legal advisor about my options. I would strongly prefer to resolve this amicably before I am forced to take further steps. Please process my refund within 48 hours. Regards, A. Chen"
+    },
+    "keywords": ["refund", "legal", "angry", "threat"],
+    "sentiment": "negative",
+    "context": "legal",
+    "deception_tactic": "Polite tone masks explicit legal advisor mention and ultimatum deadline",
+    "classifier_trap": "Reads like a billing complaint — 'refund' + 'legal advisor' pushes it to legal escalation",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "urgency=2 because legal advisor + threat combo; routing=Legal; resolution=Escalate"
+  },
+  {
+    "id": "TC-M-02",
+    "difficulty": "medium",
+    "category": "Passive-Aggressive Legal Threat",
+    "description": "Overdue invoice with attorney CC warning",
+    "raw_email": {
+      "subject": "Invoice #4821 — Final Notice Before Referral",
+      "body": "Hi, This is a courtesy reminder that Invoice #4821 for $1,200 remains overdue by 45 days. We have CC'd our attorney on this correspondence as a precautionary measure. We remain open to resolving this without formal proceedings, but require payment or a written payment plan by Friday. Thank you."
+    },
+    "keywords": ["invoice", "overdue", "attorney", "legal", "payment", "threat"],
+    "sentiment": "negative",
+    "context": "legal",
+    "deception_tactic": "Framed as a 'courtesy reminder' — attorney CC buried mid-sentence",
+    "classifier_trap": "Surface keywords look like billing; 'attorney' CC elevates to legal",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "attorney keyword present → legal context wins over billing"
+  },
+  {
+    "id": "TC-M-03",
+    "difficulty": "medium",
+    "category": "Passive-Aggressive Legal Threat",
+    "description": "Disappointed customer implying regulatory complaint",
+    "raw_email": {
+      "subject": "Extremely Disappointed — Will Be Escalating This Matter",
+      "body": "To Whom It May Concern, I am writing to express my deep dissatisfaction with how my case has been handled. I have documented every interaction and intend to escalate this to the relevant regulatory authority if I do not receive a satisfactory response within 5 business days. I trust you understand the implications. Sincerely, M. Okafor"
+    },
+    "keywords": ["angry", "threat", "legal"],
+    "sentiment": "negative",
+    "context": "legal",
+    "deception_tactic": "No explicit 'lawsuit' word — uses 'regulatory authority' and 'implications' as proxies",
+    "classifier_trap": "Vague enough to be misclassified as general complaint; 'escalate' + 'legal' intent is clear",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "threat + legal context → (2,2,2)"
+  },
+  {
+    "id": "TC-M-04",
+    "difficulty": "medium",
+    "category": "Passive-Aggressive Legal Threat",
+    "description": "SLA breach complaint with legal remedy language",
+    "raw_email": {
+      "subject": "SLA Violation — Formal Notice of Breach",
+      "body": "Dear Account Manager, As per our signed service agreement, your platform guarantees 99.9% uptime. Your service has been unavailable for 14 hours this month, constituting a material breach of contract. We are formally notifying you of this breach and reserving all legal remedies available to us under the agreement. Please respond within 2 business days. — Legal Dept, Nexus Corp"
+    },
+    "keywords": ["breach", "legal", "threat", "angry"],
+    "sentiment": "negative",
+    "context": "legal",
+    "deception_tactic": "Uses contract/SLA language — sounds like a tech complaint but is a formal legal notice",
+    "classifier_trap": "Contains 'breach' which could trigger security; context is contractual/legal",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "breach + legal dept sender + formal notice → (2,2,2)"
+  },
+  {
+    "id": "TC-M-05",
+    "difficulty": "medium",
+    "category": "Passive-Aggressive Legal Threat",
+    "description": "Billing dispute with small claims court mention",
+    "raw_email": {
+      "subject": "Re: Disputed Charge — My Next Step",
+      "body": "Hello, I have disputed the $89 charge on my account twice now with no resolution. I want to be transparent: I have already filed the paperwork for small claims court as a precaution. I am still willing to resolve this directly if you can process my refund this week. Please treat this as urgent. — T. Vasquez"
+    },
+    "keywords": ["refund", "payment", "angry", "lawsuit", "urgent"],
+    "sentiment": "negative",
+    "context": "legal",
+    "deception_tactic": "Framed as cooperative ('still willing to resolve') while small claims filing already done",
+    "classifier_trap": "Refund + payment looks like billing dispute; 'lawsuit' (small claims) escalates to legal",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "lawsuit keyword present → legal routing regardless of billing surface"
+  },
+  {
+    "id": "TC-M-06",
+    "difficulty": "medium",
+    "category": "Passive-Aggressive Legal Threat",
+    "description": "GDPR deletion request with legal consequence warning",
+    "raw_email": {
+      "subject": "Data Deletion Request — GDPR Article 17",
+      "body": "Dear Data Controller, I am formally requesting erasure of all my personal data under GDPR Article 17 (Right to Erasure). Failure to comply within 30 days constitutes a violation subject to regulatory fines of up to 4% of annual turnover. I have retained legal counsel and will file a complaint with the supervisory authority if this is not actioned. Please confirm receipt."
+    },
+    "keywords": ["legal", "breach", "threat", "angry"],
+    "sentiment": "negative",
+    "context": "legal",
+    "deception_tactic": "Sounds like a routine data request — legal counsel + regulatory fine threat is the real signal",
+    "classifier_trap": "Could be misrouted to tech support as a 'data/account request'; it is a legal compliance matter",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "legal counsel + regulatory threat → (2,2,2)"
+  },
+  {
+    "id": "TC-M-07",
+    "difficulty": "medium",
+    "category": "Passive-Aggressive Legal Threat",
+    "description": "Subscription cancellation with chargeback threat",
+    "raw_email": {
+      "subject": "Cancellation and Chargeback Notice",
+      "body": "Hi, I cancelled my subscription 3 weeks ago but was charged again this month. I have already contacted my bank to initiate a chargeback and have documented all correspondence. If this is not refunded within 24 hours, I will also be filing a complaint with the Consumer Financial Protection Bureau. I expect a prompt response."
+    },
+    "keywords": ["payment", "refund", "angry", "threat", "legal"],
+    "sentiment": "negative",
+    "context": "legal",
+    "deception_tactic": "Chargeback + CFPB complaint = regulatory/legal action disguised as billing complaint",
+    "classifier_trap": "Payment + refund looks like billing; CFPB filing is a legal/regulatory escalation",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "regulatory body complaint + threat → legal routing"
+  },
+  {
+    "id": "TC-M-08",
+    "difficulty": "medium",
+    "category": "Passive-Aggressive Legal Threat",
+    "description": "Vendor threatening IP infringement claim",
+    "raw_email": {
+      "subject": "Unauthorized Use of Proprietary Content",
+      "body": "Dear Sir/Madam, It has come to our attention that content owned by our company is being used on your platform without a valid license. We have documented evidence of this unauthorized use. Our legal team has been instructed to pursue all available remedies, including injunctive relief and damages, unless we receive written confirmation of removal within 72 hours. — IP Counsel, Meridian Media"
+    },
+    "keywords": ["unauthorized", "legal", "attorney", "threat"],
+    "sentiment": "negative",
+    "context": "legal",
+    "deception_tactic": "Formal legal letter tone — 'injunctive relief' and 'damages' are legal action signals",
+    "classifier_trap": "'Unauthorized' could trigger security breach path; this is IP legal, not account security",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "attorney + legal team + unauthorized use → (2,2,2)"
+  },
+  {
+    "_comment": "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+    "_section": "HARD — Subtle Phishing Attempts (disguised as legitimate IT/billing/HR emails)",
+    "_comment_end": "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  },
+  {
+    "id": "TC-H-01",
+    "difficulty": "hard",
+    "category": "Subtle Phishing",
+    "description": "IT password reset disguised as routine security audit",
+    "raw_email": {
+      "subject": "Mandatory Annual Security Audit — Action Required",
+      "body": "Dear Employee, As part of our annual security compliance audit, all staff are required to verify their account credentials by clicking the link below and re-entering their password. This process is mandatory and must be completed by EOD Friday. Failure to comply may result in temporary account suspension. IT Security Team."
+    },
+    "keywords": ["password", "unauthorized", "critical", "urgent", "threat"],
+    "sentiment": "negative",
+    "context": "security",
+    "deception_tactic": "Impersonates internal IT; 'mandatory audit' creates urgency; credential harvesting via fake link",
+    "classifier_trap": "Reads like a legitimate IT notice — urgency + password request is the phishing signal",
+    "correct_actions": [2, 1, 2],
+    "correct_label": "Security Breach | Tech Support | Escalate",
+    "reward_note": "password + unauthorized access attempt → (2,1,2); no legal keywords so Tech Support not Legal"
+  },
+  {
+    "id": "TC-H-02",
+    "difficulty": "hard",
+    "category": "Subtle Phishing",
+    "description": "Fake invoice payment portal redirect",
+    "raw_email": {
+      "subject": "Your Invoice #9923 is Ready — Secure Payment Required",
+      "body": "Hello, Your invoice for services rendered is now available. To avoid a late payment fee, please log in to our secure payment portal using your existing credentials to review and pay. Note: your current session has expired and you will need to re-enter your password to access the portal. Click here: http://pay-invoices-secure.net/login"
+    },
+    "keywords": ["invoice", "payment", "password", "unauthorized", "urgent"],
+    "sentiment": "neutral",
+    "context": "security",
+    "deception_tactic": "Billing-themed phish — 'session expired' forces credential re-entry on a fake domain",
+    "classifier_trap": "Invoice + payment looks like billing; password re-entry request on external URL is the phishing signal",
+    "correct_actions": [2, 1, 2],
+    "correct_label": "Security Breach | Tech Support | Escalate",
+    "reward_note": "password harvesting attempt embedded in billing context → security wins"
+  },
+  {
+    "id": "TC-H-03",
+    "difficulty": "hard",
+    "category": "Subtle Phishing",
+    "description": "HR benefits enrollment with credential capture",
+    "raw_email": {
+      "subject": "Open Enrollment Closes Friday — Update Your Benefits Now",
+      "body": "Hi Team, The annual benefits open enrollment window closes this Friday. To update your selections, please log in to the HR portal at the link below. You will be asked to verify your identity by entering your employee ID and current password. This is a one-time verification step. Don't miss the deadline — benefits cannot be changed until next year."
+    },
+    "keywords": ["password", "urgent", "critical"],
+    "sentiment": "neutral",
+    "context": "security",
+    "deception_tactic": "HR impersonation with artificial deadline; password verification step is credential theft",
+    "classifier_trap": "Completely routine-sounding HR email; password verification request is the only red flag",
+    "correct_actions": [2, 1, 2],
+    "correct_label": "Security Breach | Tech Support | Escalate",
+    "reward_note": "password request + impersonation pattern → security breach classification"
+  },
+  {
+    "id": "TC-H-04",
+    "difficulty": "hard",
+    "category": "Subtle Phishing",
+    "description": "Fake account suspension notice with login link",
+    "raw_email": {
+      "subject": "Your Account Has Been Temporarily Suspended",
+      "body": "We detected unusual activity on your account and have temporarily suspended access as a precaution. To restore your account, please verify your identity by logging in and confirming your password within 24 hours. If you do not take action, your account will be permanently closed. — Account Security Team"
+    },
+    "keywords": ["unauthorized", "password", "breach", "urgent", "threat"],
+    "sentiment": "negative",
+    "context": "security",
+    "deception_tactic": "Fear-based urgency — 'permanent closure' threat forces hasty credential submission",
+    "classifier_trap": "Looks like a legitimate security alert from the platform itself; it is an inbound phishing attempt",
+    "correct_actions": [2, 1, 2],
+    "correct_label": "Security Breach | Tech Support | Escalate",
+    "reward_note": "unauthorized + password + breach → (2,1,2); account-level attack pattern"
+  },
+  {
+    "id": "TC-H-05",
+    "difficulty": "hard",
+    "category": "Subtle Phishing",
+    "description": "Vendor onboarding form requesting system credentials",
+    "raw_email": {
+      "subject": "New Vendor Onboarding — Integration Credentials Needed",
+      "body": "Dear IT Team, We are completing the integration setup for your new vendor account. To finalize the API connection, please reply with your system admin username and current password so we can configure access on our end. This is a standard step in our onboarding process. Please respond by tomorrow to avoid delays."
+    },
+    "keywords": ["password", "unauthorized", "urgent"],
+    "sentiment": "neutral",
+    "context": "security",
+    "deception_tactic": "Business email compromise (BEC) — requests credentials via reply, not a link, to bypass URL filters",
+    "classifier_trap": "No suspicious link — credential request via email reply is the attack vector",
+    "correct_actions": [2, 1, 2],
+    "correct_label": "Security Breach | Tech Support | Escalate",
+    "reward_note": "password request via email reply = credential phishing → (2,1,2)"
+  },
+  {
+    "id": "TC-H-06",
+    "difficulty": "hard",
+    "category": "Subtle Phishing",
+    "description": "Fake security alert asking to 'confirm' recent login",
+    "raw_email": {
+      "subject": "New Sign-In Detected on Your Account",
+      "body": "We noticed a new sign-in to your account from an unrecognized device in Frankfurt, Germany. If this was you, no action is needed. If this was NOT you, please secure your account immediately by clicking below and resetting your password. Act within 1 hour to prevent unauthorized access."
+    },
+    "keywords": ["unauthorized", "password", "hacked", "breach", "urgent"],
+    "sentiment": "negative",
+    "context": "security",
+    "deception_tactic": "Classic 'was this you?' phish — creates panic about unauthorized access to harvest credentials",
+    "classifier_trap": "Indistinguishable from a real security alert; all security keywords present",
+    "correct_actions": [2, 1, 2],
+    "correct_label": "Security Breach | Tech Support | Escalate",
+    "reward_note": "unauthorized + hacked + password reset request → (2,1,2)"
+  },
+  {
+    "id": "TC-H-07",
+    "difficulty": "hard",
+    "category": "Subtle Phishing",
+    "description": "Payroll system update requiring credential re-verification",
+    "raw_email": {
+      "subject": "Payroll System Migration — Re-verify Your Account",
+      "body": "Dear Staff, We are migrating to a new payroll platform this weekend. To ensure your salary payment is not interrupted, you must re-verify your account credentials before Thursday. Please use the link below to log in with your current username and password. Accounts not verified by the deadline will be temporarily suspended pending manual review. — Payroll Department"
+    },
+    "keywords": ["payment", "password", "urgent", "threat"],
+    "sentiment": "negative",
+    "context": "security",
+    "deception_tactic": "Salary interruption fear + deadline + credential request — high-pressure BEC pattern",
+    "classifier_trap": "'Payment' keyword could route to billing; payroll phishing is a security/credential threat",
+    "correct_actions": [2, 1, 2],
+    "correct_label": "Security Breach | Tech Support | Escalate",
+    "reward_note": "password + payment context is phishing not billing → security classification"
+  },
+  {
+    "id": "TC-H-08",
+    "difficulty": "hard",
+    "category": "Subtle Phishing",
+    "description": "Software license renewal with admin credential request",
+    "raw_email": {
+      "subject": "License Renewal — Admin Verification Required",
+      "body": "Your enterprise software license expires in 3 days. To process the renewal without service interruption, our licensing team requires your system administrator credentials to apply the new license key directly. Please reply with your admin username and password at your earliest convenience. — Enterprise Licensing Support"
+    },
+    "keywords": ["password", "critical", "urgent", "error"],
+    "sentiment": "neutral",
+    "context": "security",
+    "deception_tactic": "Legitimate-sounding vendor request; 'apply license key' justification for admin credential theft",
+    "classifier_trap": "Routine renewal framing hides the admin credential request in the body",
+    "correct_actions": [2, 1, 2],
+    "correct_label": "Security Breach | Tech Support | Escalate",
+    "reward_note": "admin password request = credential phishing → (2,1,2)"
+  },
+  {
+    "_comment": "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+    "_section": "HARD — Combined: Phishing with Legal Threat Overlay (most dangerous category)",
+    "_comment_end": "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  },
+  {
+    "id": "TC-H-09",
+    "difficulty": "hard",
+    "category": "Phishing + Legal Threat",
+    "description": "Fake GDPR breach notification demanding immediate credential verification",
+    "raw_email": {
+      "subject": "URGENT: Data Breach Affecting Your Account — Legal Obligation to Act",
+      "body": "Dear Account Holder, We are legally obligated to inform you that your account data may have been exposed in a recent breach. Under GDPR Article 33, you must verify your identity within 72 hours to confirm your data has not been compromised. Please log in immediately using the secure link and re-enter your password to initiate the verification process. Failure to act may result in your account being flagged for regulatory review. — Data Protection Officer"
+    },
+    "keywords": ["breach", "hacked", "password", "legal", "threat", "urgent", "unauthorized"],
+    "sentiment": "negative",
+    "context": "security",
+    "deception_tactic": "Weaponizes GDPR compliance language to force credential submission; DPO impersonation",
+    "classifier_trap": "Legal + breach + password all present — legal keywords could misdirect to (2,2,2) but credential harvest = Tech Support response",
+    "correct_actions": [2, 1, 2],
+    "correct_label": "Security Breach | Tech Support | Escalate",
+    "reward_note": "breach+password+hacked = account-level security attack; legal language is the deception layer not the context"
+  },
+  {
+    "id": "TC-H-10",
+    "difficulty": "hard",
+    "category": "Phishing + Legal Threat",
+    "description": "Ransomware demand disguised as a software audit notice",
+    "raw_email": {
+      "subject": "Software Compliance Audit — Unlicensed Software Detected",
+      "body": "Dear IT Administrator, Our automated audit system has detected unlicensed software installations on your network. Under the Software Protection Act, continued use constitutes copyright infringement. To avoid legal proceedings and a fine of $50,000, you must click the link below to download our compliance verification tool and run it with administrator privileges within 24 hours. — BSA Compliance Division"
+    },
+    "keywords": ["hacked", "breach", "unauthorized", "lawsuit", "legal", "threat", "critical", "urgent"],
+    "sentiment": "negative",
+    "context": "security",
+    "deception_tactic": "BSA impersonation + legal fine threat to trick admin into running malware with elevated privileges",
+    "classifier_trap": "Legal fine language could route to (2,2,2); but the attack vector is malware execution = security + legal",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "hacked+breach+lawsuit+legal = ransomware with legal overlay → (2,2,2)"
+  },
+  {
+    "id": "TC-H-11",
+    "difficulty": "hard",
+    "category": "Phishing + Legal Threat",
+    "description": "Extortion email threatening to publish stolen data",
+    "raw_email": {
+      "subject": "We Have Your Data — Read Carefully",
+      "body": "We have obtained a copy of your customer database through a vulnerability in your system. We are prepared to sell this data to your competitors or publish it publicly unless you transfer $15,000 in cryptocurrency within 48 hours. We have also retained an attorney to ensure our anonymity is protected. Do not contact law enforcement. This is your only warning."
+    },
+    "keywords": ["hacked", "breach", "unauthorized", "attorney", "threat", "critical", "urgent"],
+    "sentiment": "negative",
+    "context": "security",
+    "deception_tactic": "Classic extortion with attorney mention to add credibility and deter police contact",
+    "classifier_trap": "Attorney keyword present — but this is a security extortion event requiring both Tech + Legal response",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "hacked+breach+attorney+threat = ransomware/extortion → (2,2,2)"
+  },
+  {
+    "id": "TC-H-12",
+    "difficulty": "hard",
+    "category": "Phishing + Legal Threat",
+    "description": "Fake law firm letter claiming evidence of data misuse",
+    "raw_email": {
+      "subject": "Notice of Pending Legal Action — Hargrove & Associates",
+      "body": "Dear Sir/Madam, This firm represents a class of individuals whose personal data was allegedly misused by your organization. We have obtained forensic evidence of unauthorized data processing and intend to file suit unless we receive a response from your legal counsel within 10 business days. Please ensure this notice is forwarded to your Data Protection Officer and General Counsel immediately. — J. Hargrove, Esq."
+    },
+    "keywords": ["unauthorized", "breach", "attorney", "lawsuit", "legal", "threat"],
+    "sentiment": "negative",
+    "context": "legal",
+    "deception_tactic": "Convincing law firm letterhead format; 'forensic evidence' claim creates panic; may be fake to extract settlement",
+    "classifier_trap": "Looks identical to a real legal notice — all legal keywords present; requires Legal team verification",
+    "correct_actions": [2, 2, 2],
+    "correct_label": "Security Breach | Legal | Escalate",
+    "reward_note": "attorney+lawsuit+legal+breach = legal context confirmed → (2,2,2)"
+  }
+]

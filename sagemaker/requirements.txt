@@ -1,0 +1,10 @@
+# SageMaker inference container dependencies
+# The SKLearn container already includes: boto3, numpy, scikit-learn
+# Only add packages your inference.py actually imports beyond stdlib
+
+# No additional packages needed for the rule-based classifier.
+# Uncomment below if you switch to an ML model later:
+
+# torch==2.1.0
+# transformers==4.35.0
+# huggingface_hub==0.19.0

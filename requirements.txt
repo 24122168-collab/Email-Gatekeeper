@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+gymnasium
+numpy>
+pydantic
+gradio
+pyyaml
+google-generativeai
