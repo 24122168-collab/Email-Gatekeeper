@@ -7,17 +7,14 @@ name: email-gatekeeper
 version: "1.0.0"
 description: >
   Intelligent Email Gatekeeper — a Gymnasium-based Reinforcement Learning
-  environment where an agent learns to triage emails by simultaneously
-  predicting three dimensions: Urgency Category, Department Routing,
-  and Resolution Action. Covers 32 scenarios across spam detection,
-  support routing, and phishing/security threat identification.
-
+  environment for triage.
 author: zerogravity
 license: MIT
 framework: gymnasium
 python_requires: ">=3.10"
 
 # ── Entry point ───────────────────────────────────────────────────────────────
+# Dhyan dein: 'env' aapki file ka naam hai aur 'EmailTriageEnv' class ka
 entry_point: "env:EmailTriageEnv"
 
 # ── Observation space ─────────────────────────────────────────────────────────
@@ -27,147 +24,37 @@ observation_space:
   dtype: float32
   low: 0.0
   high: 1.0
-  description: >
-    Flat vector of 32 floats encoding:
-      [0:24]  Binary keyword flags (24 vocab words)
-      [24:27] One-hot sentiment    (positive / neutral / negative)
-      [27:32] One-hot context      (spam / billing / tech / security / legal)
 
 # ── Action space ──────────────────────────────────────────────────────────────
 action_space:
   type: MultiDiscrete
   nvec: [3, 3, 3]
-  dimensions:
-    - name: urgency
-      index: 0
-      values:
-        0: General
-        1: Billing
-        2: Security Breach
-    - name: routing
-      index: 1
-      values:
-        0: AI Auto-Reply
-        1: Tech Support
-        2: Legal
-    - name: resolution
-      index: 2
-      values:
-        0: Archive
-        1: Draft Reply
-        2: Escalate
-
-# ── Reward function ───────────────────────────────────────────────────────────
-reward:
-  description: >
-    Strict penalty-based reward. Security breach misses are penalised
-    at 4x the magnitude of a correct answer to reflect real-world risk.
-  rules:
-    - condition: "correct urgency=2 but predicted urgency != 2"
-      reward: -2.0
-      label: SECURITY_MISS
-    - condition: "all three dimensions exactly correct"
-      reward: +1.0
-      label: EXACT
-    - condition: "urgency correct, exactly one other dimension wrong"
-      reward: +0.2
-      label: PARTIAL_1
-    - condition: "urgency correct, both other dimensions wrong"
-      reward: +0.1
-      label: PARTIAL_2
-    - condition: "urgency wrong on non-security email"
-      reward: 0.0
-      label: WRONG
-  normalisation: >
-    Each raw reward is divided by (num_emails * 1.0) so the ideal
-    cumulative episode score = 1.0
 
 # ── Tasks ─────────────────────────────────────────────────────────────────────
 tasks:
-
   - id: easy
-    name: "Task 1 — Spam vs Real Email Detection"
     difficulty: easy
-    description: >
-      Agent must distinguish promotional spam from legitimate emails
-      and assign correct General/Billing urgency with appropriate routing.
     num_emails: 4
-    email_types:
-      - Spam promotional
-      - Spam lottery
-      - Routine tech support
-      - General billing inquiry
     target_score: 1.0
-    baseline_score: 1.0
-    success_threshold: 0.8
-
   - id: medium
-    name: "Task 2 — Support Routing & Passive-Aggressive Legal Threats"
     difficulty: medium
-    description: >
-      Agent must correctly route billing disputes, tech issues, and
-      passive-aggressive legal threats that use polite language to
-      disguise escalation intent.
     num_emails: 8
-    email_types:
-      - Overdue invoice complaint
-      - Refund dispute
-      - App crash report
-      - Persistent login bug
-      - Polite legal ultimatum
-      - Attorney CC warning
-      - Regulatory complaint
-      - SLA breach legal notice
     target_score: 1.0
-    baseline_score: 0.95
-    success_threshold: 0.75
-
   - id: hard
-    name: "Task 3 — Phishing Detection & Security Threat Classification"
     difficulty: hard
-    description: >
-      Agent must identify subtle phishing attempts disguised as IT notices,
-      HR emails, and vendor requests, plus classify ransomware and extortion
-      threats that combine security and legal signals.
     num_emails: 16
-    email_types:
-      - IT audit phishing
-      - Fake invoice portal redirect
-      - HR credential capture
-      - Fake account suspension
-      - Business Email Compromise (BEC)
-      - Sign-in alert phishing
-      - Payroll migration phish
-      - License renewal BEC
-      - GDPR phishing with legal overlay
-      - Ransomware disguised as audit
-      - Data extortion threat
-      - Fake law firm letter
-      - Account hacked urgent
-      - Data breach notification
-      - Legal lawsuit threat
-      - Ransomware extortion
     target_score: 1.0
-    baseline_score: 0.90
-    success_threshold: 0.70
-
-# ── Environment parameters ────────────────────────────────────────────────────
-parameters:
-  shuffle:
-    type: bool
-    default: true
-    description: Shuffle email order on each reset for training variety
-  task:
-    type: str
-    default: all
-    choices: [easy, medium, hard, all]
-    description: Which difficulty subset to load
 
 # ── Dependencies ──────────────────────────────────────────────────────────────
+# Inka hona zaroori hai taaki validator ko pata chale kya install karna hai
 dependencies:
   - gymnasium>=0.29.0
   - numpy>=1.24.0
   - pydantic>=2.0.0
+  - fastapi
+  - uvicorn
+  - gradio
+  - pyyaml
 
 # ── Reproducibility ───────────────────────────────────────────────────────────
 reproducibility:
