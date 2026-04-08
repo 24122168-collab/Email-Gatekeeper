@@ -1,19 +1,22 @@
-# Base image
 FROM python:3.11-slim
 
-# Set work directory
+# User setup for Hugging Face
+RUN useradd -m -u 1000 user
+USER user
+ENV PATH="/home/user/.local/bin:${PATH}"
+
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy and install as user
+COPY --chown=user requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
 
-# Copy project files
-COPY . .
+# Copy all project files
+COPY --chown=user . .
 
-# Expose the port Hugging Face expects
+# Expose port
 EXPOSE 7860
 
 # --- YAHAN CHANGE HAI ---
-# Command to run Gradio app directly
-CMD ["python", "app.py"]
+# Direct uvicorn ki jagah hum python module run karenge jo main() ko call karega
+CMD ["python", "-m", "server.app"]
