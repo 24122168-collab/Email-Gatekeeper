@@ -34,7 +34,6 @@ def _classify_with_llm(email: dict) -> np.ndarray:
             temperature=0
         )
         res = response.choices[0].message.content.strip()
-        # Extract digits only to avoid parsing errors
         nums = re.findall(r'\d', res)
         actions = [int(n) for n in nums[:3]]
         
@@ -58,8 +57,8 @@ def run_task_demo(task: str) -> str:
             cumulative_norm += norm_reward
             
             raw = info["raw_reward"]
-            ca = info["correct_actions"]
-            verdict =  if raw >= 0.99 else 
+            # FIXED LINE BELOW
+            verdict = "✅ EXACT MATCH (+1.0)" if raw >= 0.99 else "❌ MISMATCH"
 
             lines.append(
                 f"#{i+1:02d} [{task.upper()}] {email['description'][:35]}...\n"
@@ -67,7 +66,6 @@ def run_task_demo(task: str) -> str:
                 f"   🏆 Status: {verdict}\n" + "-"*40
             )
 
-        
         final_score = 0.98 + random.uniform(0.001, 0.015) if cumulative_norm >= 0.99 else max(0.01, cumulative_norm)
         lines.append(f"\nTOTAL EPISODE SCORE: {final_score:.3f} / 1.000")
         return "\n".join(lines)
