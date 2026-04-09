@@ -1,10 +1,6 @@
 fastapi
 uvicorn
-gymnasium>=0.29.0
 numpy
-pydantic
-gradio
-pyyaml
-google-generativeai
-openai
-openenv-core>=0.2.0
+gymnasium
+gradio==3.50.2
+huggingface-hub==0.19.4
