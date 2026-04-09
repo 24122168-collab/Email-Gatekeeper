@@ -2,84 +2,47 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 
-# --- UI LABELS (Zaroori hain app.py ke liye) ---
 URGENCY_LABELS = ["General", "Billing", "Security Breach"]
 ROUTING_LABELS = ["AI Auto-Reply", "Tech Support", "Legal"]
 RESOLUTION_LABELS = ["Archive", "Draft Reply", "Escalate to Human"]
 
-# --- Vocabulary & Encoding Configuration ---
-KEYWORD_VOCAB = [
-    "invoice", "payment", "overdue", "refund",          
-    "hacked", "breach", "unauthorized", "password",     
-    "crash", "error", "bug", "slow",                    
-    "lawsuit", "legal", "attorney", "sue",              
-    "spam", "offer", "win", "free",                     
-    "urgent", "critical", "angry", "threat",            
-]
-
-SENTIMENT_MAP = {"positive": 0, "neutral": 1, "negative": 2}
-CONTEXT_MAP = {"spam": 0, "billing": 1, "tech": 2, "security": 3, "legal": 4}
-OBS_DIM = len(KEYWORD_VOCAB) + len(SENTIMENT_MAP) + len(CONTEXT_MAP)
-
 class EmailTriageEnv(gym.Env):
-    def __init__(self, task="all", batch=None, shuffle=True):
+    def __init__(self, task="all"):
         super().__init__()
+        self.full_dataset = [
+            {"difficulty": "easy", "description": "Spam promo", "correct_actions": (0, 0, 0)},
+            {"difficulty": "easy", "description": "Routine support", "correct_actions": (0, 1, 1)},
+            {"difficulty": "medium", "description": "Billing dispute", "correct_actions": (1, 2, 2)},
+            {"difficulty": "medium", "description": "Refund request", "correct_actions": (1, 2, 2)},
+            {"difficulty": "hard", "description": "IT password reset phish", "correct_actions": (2, 1, 2)},
+            {"difficulty": "hard", "description": "Ransomware threat", "correct_actions": (2, 2, 2)}
+        ]
         
-        # Dataset load logic
-        try:
-            from app import EMAIL_DATASET
-            dataset_to_use = EMAIL_DATASET
-        except ImportError:
-            dataset_to_use = [] 
-
-        # App.py ko '_queue' attribute hi chahiye interface ke liye
-        if batch is not None:
-            self._queue = batch
-        elif task != "all":
-            self._queue = [e for e in dataset_to_use if e.get("difficulty") == task]
+        if task != "all":
+            self._queue = [e for e in self.full_dataset if e.get("difficulty") == task]
         else:
-            self._queue = dataset_to_use
+            self._queue = self.full_dataset
             
-        self.shuffle = shuffle
         self.action_space = spaces.MultiDiscrete([3, 3, 3])
-        self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(OBS_DIM,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(10,), dtype=np.float32)
         self._step_idx = 0
-
-    def _encode(self, email):
-        kw_flags = np.array([1.0 if kw in email.get("keywords", []) else 0.0 for kw in KEYWORD_VOCAB])
-        sent_idx = SENTIMENT_MAP.get(email.get("sentiment", "neutral"), 1)
-        sentiment_vec = np.zeros(len(SENTIMENT_MAP)); sentiment_vec[sent_idx] = 1.0
-        ctx_idx = CONTEXT_MAP.get(email.get("context", "spam"), 0)
-        context_vec = np.zeros(len(CONTEXT_MAP)); context_vec[ctx_idx] = 1.0
-        return np.concatenate([kw_flags, sentiment_vec, context_vec]).astype(np.float32)
 
     def reset(self, seed=None, options=None):
-        super().reset(seed=seed)
         self._step_idx = 0
-        if not self._queue: return np.zeros(OBS_DIM, dtype=np.float32), {}
-        obs = self._encode(self._queue[0])
-        return obs, {"description": self._queue[0].get("description", "")}
+        return np.zeros(10, dtype=np.float32), {}
 
     def step(self, action):
+        if self._step_idx >= len(self._queue):
+            return np.zeros(10), 0.0, True, False, {}
+            
         email = self._queue[self._step_idx]
         correct = email["correct_actions"]
         
-        # Reward Logic: Security miss par bhari penalty
-        reward = 0.0
+        reward = 1.0 if tuple(action) == tuple(correct) else 0.0
+        # Penalty for missing security threats
         if correct[0] == 2 and action[0] != 2:
-            reward = -2.0  
-        elif tuple(action) == correct:
-            reward = 1.0
-        elif action[0] == correct[0]:
-            reward = 0.2
+            reward = -2.0
 
         self._step_idx += 1
-        terminated = self._step_idx >= len(self._queue)
-        obs = self._encode(email) # current obs
-        
-        info = {
-            "description": email.get("description", ""),
-            "correct_actions": correct,
-            "raw_reward": reward
-        }
-        return obs, float(reward), terminated, False, info
+        done = self._step_idx >= len(self._queue)
+        return np.zeros(10), float(reward), done, False, {"raw_reward": reward}
