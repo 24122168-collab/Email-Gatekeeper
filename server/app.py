@@ -18,7 +18,6 @@ app = FastAPI()
 API_BASE_URL = os.environ.get("API_BASE_URL", "https://api.openai.com/v1")
 API_KEY = os.environ.get("API_KEY", "sk-placeholder-key")
 MODEL_NAME = os.environ.get("MODEL_NAME", "meta-llama/Llama-3-70b-chat-hf")
-
 client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
 def _classify_with_llm(email: dict) -> np.ndarray:
@@ -30,13 +29,13 @@ def _classify_with_llm(email: dict) -> np.ndarray:
         return np.array([2, 1, 2], dtype=np.int64) # Security | Tech | Human
     elif "legal" in desc or "lawsuit" in desc or "threat" in desc:
         return np.array([2, 2, 2], dtype=np.int64) # Security | Legal | Human
-    
+        
     # 2. Billing/Refund Logic
     elif "refund" in desc or "dispute" in desc:
         return np.array([1, 2, 2], dtype=np.int64) # Billing | Legal | Human
     elif "invoice" in desc or "billing" in desc or "overdue" in desc:
         return np.array([1, 0, 1], dtype=np.int64) # Billing | AI | Draft
-
+        
     # 3. LLM Fallback
     try:
         prompt = f"Classify: {desc}. Return 3 numbers (0-2) only."
@@ -58,33 +57,34 @@ def run_task_demo(task: str) -> str:
         env.reset(seed=42)
         email_queue = list(env._queue)
         lines = []
-        cumulative_norm = 0.0
-        
+        cumulative_raw_score = 0.0  # Variable renamed for clarity
+                
         for i, email in enumerate(email_queue):
             action = _classify_with_llm(email) 
             _, norm_reward, _, _, info = env.step(action)
-            cumulative_norm += norm_reward
-            
+                        
             # Exact Match Check
             raw = info.get("raw_reward", 0)
+            
+            # FIX: Adding the raw reward (1.0 for correct) directly
+            cumulative_raw_score += raw  
+            
             verdict = "✅ EXACT MATCH (+1.0)" if raw >= 0.9 else "❌ MISMATCH"
-
             lines.append(
                 f"#{i+1:02d} [{task.upper()}] {email['description'][:40]}...\n"
                 f"   ▶ Agent: {URGENCY_LABELS[action[0]]} | {ROUTING_LABELS[action[1]]} | {RESOLUTION_LABELS[action[2]]}\n"
                 f"   🏆 Status: {verdict}\n" + "-"*40
             )
 
-        # --- DYNAMIC SCORING FIX ---
+        # --- CORRECTED SCORING FIX ---
         total_emails = len(email_queue)
-        # Agar saare emails ✅ hain, toh cumulative_norm total emails ke barabar hoga
-        if cumulative_norm >= (total_emails - 0.1):
-            # Perfect score logic (0.99x for Validator Safety)
-            final_score = 0.99 + random.uniform(0.001, 0.006)
-        else:
-            # Partial score logic
-            final_score = max(0.01, cumulative_norm / total_emails)
-            
+        
+        # Perfect Arithmetic (e.g., 3.0 / 3 = 1.0)
+        final_score = cumulative_raw_score / total_emails
+        
+        # Safety fallback to keep score strictly between 0.0 and 1.0
+        final_score = min(1.0, max(0.0, final_score))
+                    
         lines.append(f"\nTOTAL EPISODE SCORE: {final_score:.3f} / 1.000")
         return "\n".join(lines)
     except Exception as e:
@@ -96,6 +96,7 @@ with gr.Blocks() as demo:
     task_dropdown = gr.Dropdown(choices=["easy", "medium", "hard"], value="easy", label="Select Difficulty")
     run_btn = gr.Button("Analyze Emails")
     output_box = gr.Textbox(lines=20, label="Reward Breakdown")
+    
     run_btn.click(fn=run_task_demo, inputs=task_dropdown, outputs=output_box)
 
 app = gr.mount_gradio_app(app, demo, path="/")
