@@ -25,10 +25,14 @@ action_space:
     type: integer
   length: 3
 
+# ✅ FIXED TASKS (IMPORTANT)
 tasks:
   - id: easy
+    description: Simple email classification
   - id: medium
+    description: Mixed intent emails
   - id: hard
+    description: Complex multi-intent and security emails
 
 reward_range: [0.0, 1.0]
 
