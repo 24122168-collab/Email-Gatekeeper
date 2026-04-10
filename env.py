@@ -1,5 +1,4 @@
 from typing import List, Dict, Any, Tuple
-import random
 
 URGENCY_LABELS = ["low", "medium", "high"]
 ROUTING_LABELS = ["general", "support", "security"]
@@ -13,42 +12,50 @@ class EmailTriageEnv:
         self._index = 0
         self._done = False
 
-    # ✅ TASK-WISE DATA (required for grader)
+    # ✅ EXPLICIT TASK DATA (NO RANDOMNESS)
     def _generate_emails(self) -> List[Dict]:
-        task_data = {
-            "easy": [
+        if self.task == "easy":
+            return [
                 {"description": "Password reset not working", "label": [2, 1, 2]},
                 {"description": "Billing refund request", "label": [1, 2, 2]},
-                {"description": "App is slow and buggy", "label": [0, 1, 1]},
-            ],
-            "medium": [
-                {"description": "Password reset not working", "label": [2, 1, 2]},
-                {"description": "Billing refund request", "label": [1, 2, 2]},
-                {"description": "App is slow and buggy", "label": [0, 1, 1]},
-                {"description": "Possible phishing attempt detected", "label": [2, 2, 2]},
-                {"description": "Invoice mismatch and payment issue", "label": [1, 2, 2]},
-            ],
-            "hard": [
-                {"description": "Password reset not working", "label": [2, 1, 2]},
-                {"description": "Billing refund request", "label": [1, 2, 2]},
-                {"description": "App is slow and buggy", "label": [0, 1, 1]},
-                {"description": "Possible phishing attempt detected", "label": [2, 2, 2]},
-                {"description": "Invoice mismatch and payment issue", "label": [1, 2, 2]},
-                {"description": "Ransomware attack suspected on system", "label": [2, 2, 2]},
-                {"description": "User reports data breach and performance issues", "label": [2, 2, 2]},
-            ],
-        }
+                {"description": "App is slow", "label": [0, 1, 1]},
+            ]
 
-        emails = task_data.get(self.task, task_data["easy"])
-        random.shuffle(emails)
-        return emails
+        elif self.task == "medium":
+            return [
+                {"description": "Password reset not working", "label": [2, 1, 2]},
+                {"description": "Billing refund request", "label": [1, 2, 2]},
+                {"description": "App is slow", "label": [0, 1, 1]},
+                {"description": "Possible phishing attempt detected", "label": [2, 2, 2]},
+                {"description": "Invoice mismatch issue", "label": [1, 2, 2]},
+            ]
 
-    # ✅ RESET
+        elif self.task == "hard":
+            return [
+                {"description": "Password reset not working", "label": [2, 1, 2]},
+                {"description": "Billing refund request", "label": [1, 2, 2]},
+                {"description": "App is slow", "label": [0, 1, 1]},
+                {"description": "Possible phishing attempt detected", "label": [2, 2, 2]},
+                {"description": "Invoice mismatch issue", "label": [1, 2, 2]},
+                {"description": "Ransomware attack suspected", "label": [2, 2, 2]},
+                {"description": "Data breach reported", "label": [2, 2, 2]},
+            ]
+
+        else:
+            return []
+
+    # ✅ RESET (DETERMINISTIC)
     def reset(self) -> Dict[str, Any]:
         self._queue = self._generate_emails()
         self._index = 0
         self._done = False
-        return self.state()
+
+        return {
+            "description": self._queue[self._index]["description"],
+            "step": 0,
+            "remaining": len(self._queue),
+            "done": False
+        }
 
     # ✅ STATE
     def state(self) -> Dict[str, Any]:
@@ -63,20 +70,16 @@ class EmailTriageEnv:
             "done": False
         }
 
-    # ✅ STEP (GRADER LOGIC)
+    # ✅ STEP (CLEAR GRADER)
     def step(self, action: List[int]) -> Tuple[Dict, float, bool, Dict, Dict]:
         if self._done:
             return self.state(), 0.0, True, {}, {}
 
         correct = self._queue[self._index]["label"]
 
-        # 🎯 PARTIAL REWARD (important)
+        # 🎯 GRADER (CLEAR + NORMALIZED)
         matches = sum(1 for a, b in zip(action, correct) if a == b)
         reward = matches / 3.0  # normalized [0,1]
-
-        # 🔥 BONUS for perfect prediction
-        if matches == 3:
-            reward = 1.0
 
         self._index += 1
 
