@@ -1,63 +1,40 @@
-# openenv.yaml — Email Gatekeeper RL Environment
-# OpenEnv Specification v1.0
-# Meta x PyTorch Hackathon Submission
-# ============================================================
-
-name: email-gatekeeper
+name: email-triage-env
 version: "1.0.0"
-description: >
-  Intelligent Email Gatekeeper — a Gymnasium-based Reinforcement Learning
-  environment for triage.
+
+description: RL environment for email triage
+
 author: zerogravity
 license: MIT
-framework: gymnasium
 python_requires: ">=3.10"
 
-# ── Entry point ───────────────────────────────────────────────────────────────
-# Dhyan dein: 'env' aapki file ka naam hai aur 'EmailTriageEnv' class ka
 entry_point: "env:EmailTriageEnv"
 
-# ── Observation space ─────────────────────────────────────────────────────────
 observation_space:
-  type: Box
-  shape: [32]
-  dtype: float32
-  low: 0.0
-  high: 1.0
+  type: object
+  properties:
+    description:
+      type: string
+    step:
+      type: integer
+    remaining:
+      type: integer
 
-# ── Action space ──────────────────────────────────────────────────────────────
 action_space:
-  type: MultiDiscrete
-  nvec: [3, 3, 3]
+  type: array
+  items:
+    type: integer
+  length: 3
 
-# ── Tasks ─────────────────────────────────────────────────────────────────────
 tasks:
   - id: easy
-    difficulty: easy
-    num_emails: 4
-    target_score: 1.0
   - id: medium
-    difficulty: medium
-    num_emails: 8
-    target_score: 1.0
   - id: hard
-    difficulty: hard
-    num_emails: 16
-    target_score: 1.0
 
-# ── Dependencies ──────────────────────────────────────────────────────────────
-# Inka hona zaroori hai taaki validator ko pata chale kya install karna hai
+reward_range: [0.0, 1.0]
+
 dependencies:
-  - gymnasium>=0.29.0
   - numpy>=1.24.0
-  - pydantic>=2.0.0
-  - fastapi
-  - uvicorn
-  - gradio
-  - pyyaml
 
-# ── Reproducibility ───────────────────────────────────────────────────────────
 reproducibility:
-  seed: 42
   deterministic: true
   baseline_script: inference.py
