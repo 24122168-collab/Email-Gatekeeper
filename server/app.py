@@ -1,67 +1,62 @@
-import sys
 import os
-import uvicorn
-import numpy as np
-import gradio as gr
-from fastapi import FastAPI
+from typing import List, Tuple
 
-# Path fix taaki env.py mil jaye
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from env import EmailTriageEnv, URGENCY_LABELS, ROUTING_LABELS, RESOLUTION_LABELS
+from env import EmailTriageEnv
 
-app = FastAPI()
 
-def smart_agent_logic(desc):
+def smart_agent_logic(desc: str) -> List[int]:
     desc = desc.lower()
+
     if any(x in desc for x in ["password", "hacked", "breach", "phish", "threat", "ransomware"]):
         return [2, 2, 2] if "threat" in desc or "ransomware" in desc else [2, 1, 2]
-    if any(x in desc for x in ["billing", "refund", "dispute", "invoice", "payment"]):
+
+    if any(x in desc for x in ["billing", "refund", "invoice", "payment"]):
         return [1, 2, 2]
-    if any(x in desc for x in ["support", "routine", "slow", "error"]):
+
+    if any(x in desc for x in ["slow", "error", "bug", "support"]):
         return [0, 1, 1]
+
     return [0, 0, 0]
 
-def run_demo(task):
-    try:
-        env = EmailTriageEnv(task=task)
-        env.reset()
-        results = []; total_reward = 0
-        print(f"[START] Task: {task}")
-        for i, email in enumerate(env._queue):
-            action = smart_agent_logic(email['description'])
-            _, reward, _, _, _ = env.step(action)
-            total_reward += reward
-            print(f"[STEP] Index: {i} | Action: {action} | Reward: {reward}")
-            status = "✅ MATCH" if reward >= 1.0 else "❌ MISMATCH"
-            results.append(f"#{i+1} [{task.upper()}] {email['description'][:30]}... | {status}")
-        score = total_reward / len(env._queue) if env._queue else 0
-        print(f"[END] Final Score: {score}")
-        return "\n".join(results) + f"\n\n--- FINAL SCORE: {score:.3f} ---"
-    except Exception as e:
-        return f"Error: {str(e)}"
 
-# --- REQUIRED BY VALIDATOR ---
+def run_episode(task: str) -> Tuple[float, List[float], int]:
+    env = EmailTriageEnv(task=task)
+
+    state = env.reset()
+
+    rewards: List[float] = []
+    steps = 0
+    total_reward = 0.0
+
+    while True:
+        if state.get("done"):
+            break
+
+        desc = state["description"]
+
+        action = smart_agent_logic(desc)
+
+        state, reward, done, _, _ = env.step(action)
+
+        rewards.append(reward)
+        total_reward += reward
+        steps += 1
+
+        if done:
+            break
+
+    score = total_reward / len(rewards) if rewards else 0.0
+
+    return score, rewards, steps
+
+
 def main():
-    print("--- 🚀 STARTING MULTI-MODE DEPLOYMENT TEST ---")
-    for level in ["easy", "medium", "hard"]:
-        print(run_demo(level))
+    task = os.getenv("MY_ENV_V4_TASK", "easy")
 
-@app.post("/reset")
-async def reset_endpoint():
-    return {"status": "success"}
+    score, rewards, steps = run_episode(task)
 
-# Gradio Setup
-with gr.Blocks() as demo:
-    gr.Markdown("# 📧 Email Gatekeeper AI")
-    diff = gr.Dropdown(["easy", "medium", "hard"], value="easy", label="Difficulty")
-    btn = gr.Button("Analyze Emails")
-    out = gr.Textbox(label="Logs", lines=10)
-    btn.click(run_demo, inputs=diff, outputs=out)
+    print(f"Task={task} | Steps={steps} | Score={score:.3f}")
 
-app = gr.mount_gradio_app(app, demo, path="/")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "--test":
-        main()
-    else:
-        uvicorn.run(app, host="0.0.0.0", port=7860)
+    main()
