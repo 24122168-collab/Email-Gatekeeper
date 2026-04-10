@@ -1,6 +1,5 @@
+numpy>=1.24.0
+openai>=1.0.0
 fastapi
 uvicorn
-numpy
-gymnasium
-gradio==3.50.2
-huggingface-hub==0.19.4
+gradio
