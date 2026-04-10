@@ -7,16 +7,18 @@ from env import EmailTriageEnv
 from app import smart_agent_logic
 
 
-# ✅ MUST use these EXACT env vars
+# ✅ REQUIRED env vars
 API_BASE_URL = os.environ.get("API_BASE_URL")
 API_KEY = os.environ.get("API_KEY")
 MODEL_NAME = os.environ.get("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 
-TASK_NAME = os.getenv("MY_ENV_V4_TASK", "easy")
 BENCHMARK = "email_triage_env"
 
 MAX_STEPS = 20
 SUCCESS_SCORE_THRESHOLD = 0.5
+
+# ✅ RUN ALL TASKS
+TASKS = ["easy", "medium", "hard"]
 
 
 def log_start(task: str, env: str, model: str) -> None:
@@ -42,14 +44,7 @@ def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> No
     )
 
 
-def main():
-    # ✅ REQUIRED: Initialize OpenAI client with provided proxy
-    try:
-        client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
-    except Exception as e:
-        print(f"[DEBUG] OpenAI init failed: {e}", flush=True)
-        client = None
-
+def run_task(client, TASK_NAME):
     env = EmailTriageEnv(task=TASK_NAME)
 
     rewards: List[float] = []
@@ -69,9 +64,9 @@ def main():
             try:
                 desc = state["description"]
 
-                # ✅ 🔥 LLM CALL (MANDATORY)
                 action_list = None
 
+                # ✅ LLM CALL
                 if client:
                     try:
                         response = client.chat.completions.create(
@@ -91,17 +86,15 @@ def main():
                         )
 
                         text = response.choices[0].message.content.strip()
-
-                        # Parse response
                         action_list = [int(x) for x in text.replace(",", " ").split()[:3]]
 
                         if len(action_list) != 3:
-                            raise ValueError("Invalid LLM output")
+                            raise ValueError()
 
                     except Exception as llm_error:
                         print(f"[DEBUG] LLM failed: {llm_error}", flush=True)
 
-                # ✅ fallback if LLM fails
+                # fallback
                 if not action_list:
                     action_list = smart_agent_logic(desc)
 
@@ -127,6 +120,18 @@ def main():
 
     finally:
         log_end(success, steps_taken, score, rewards)
+
+
+def main():
+    try:
+        client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    except Exception as e:
+        print(f"[DEBUG] OpenAI init failed: {e}", flush=True)
+        client = None
+
+    # ✅ RUN ALL TASKS
+    for task in TASKS:
+        run_task(client, task)
 
 
 if __name__ == "__main__":
